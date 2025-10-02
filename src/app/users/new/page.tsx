@@ -1,27 +1,36 @@
+// app/users/new/page.tsx
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { usersApi } from '@/lib/usersApi';
-import { ApiError } from '@/lib/apiClient';
 import UserForm from '@/components/organisms/UserForm';
+import { useUserForm, useUserOperations } from '@/hook';
 
 export default function NewUserPage() {
   const [msg, setMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (userData: { email: string; name: string; phone?: string | null }) => {
-    setLoading(true);
-    setMsg(null);
-    try {
-      await usersApi.create(userData);
+  // フォーム状態管理
+  const { formData, errors, handleChange, validate, getSubmitData } = useUserForm({
+    mode: 'create'
+  });
+
+  // ユーザー作成操作
+  const { createUser, isLoading, error, clearError } = useUserOperations({
+    onSuccess: () => {
       router.push('/users');
-    } catch (e) {
-      const err = e as ApiError;
-      if (err.status === 409) setMsg('そのメールは既に使われています');
-      else setMsg(err.message ?? 'エラーが発生しました');
-    } finally {
-      setLoading(false);
+    },
+    onError: (error) => {
+      if (error.status === 409) {
+        setMsg('そのメールは既に使われています');
+      } else {
+        setMsg(error.message ?? 'エラーが発生しました');
+      }
+    }
+  });
+
+  const handleSubmit = async (userData: { email: string; name: string; phone?: string | null }) => {
+    if (validate()) {
+      await createUser(userData);
     }
   };
 
@@ -36,7 +45,7 @@ export default function NewUserPage() {
         mode="create"
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        loading={loading}
+        loading={isLoading}
       />
       {msg && <p style={{ color: 'crimson', marginTop: 12 }}>{msg}</p>}
     </main>

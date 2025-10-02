@@ -3,35 +3,36 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import useSWR from 'swr';
-import { usersApi, UsersListResponse, User } from '@/lib/usersApi';
 import { API_BASE, ApiError } from '@/lib/apiClient';
 import { useCallback } from 'react';
 import Button from '@/components/atoms/Button';
 import UserTable from '@/components/organisms/UserTable';
+import { useUsers, useUserOperations } from '@/hook';
 
 export default function UsersPage() {
   const router = useRouter();
-  const { data, error, isLoading, mutate } = useSWR<UsersListResponse>(
-    ['users.list', {}],
-    () => usersApi.list(),
-    { revalidateOnFocus: false, shouldRetryOnError: false }
-  );
+  
+  // ユーザー一覧の取得
+  const { users, error, isLoading, mutate } = useUsers({
+    revalidateOnFocus: false,
+    shouldRetryOnError: false
+  });
 
-  const toArray = (d?: UsersListResponse) =>
-    Array.isArray(d) ? d : d?.items ?? [];
-
-  const items: User[] = toArray(data);
-
-  const onDelete = useCallback(async (id: string) => {
-    if (!confirm('削除しますか？')) return;
-    await usersApi.remove(id);
-    mutate();
-  }, [mutate]);
+  // ユーザー削除操作
+  const { deleteUser, isLoading: isDeleting } = useUserOperations({
+    onSuccess: () => mutate(), // 削除成功後に一覧を再取得
+    onError: (error) => {
+      console.error('削除エラー:', error);
+    }
+  });
 
   const onEdit = useCallback((id: string) => {
     router.push(`/users/${id}/edit`);
   }, [router]);
+
+  const onDelete = useCallback(async (id: string) => {
+    await deleteUser(id);
+  }, [deleteUser]);
 
   return (
     <main style={{ maxWidth: 900, margin: '2rem auto' }}>
@@ -63,7 +64,7 @@ export default function UsersPage() {
 
       {!isLoading && !error && (
         <UserTable
-          users={items}
+          users={users}
           onEdit={onEdit}
           onDelete={onDelete}
         />
