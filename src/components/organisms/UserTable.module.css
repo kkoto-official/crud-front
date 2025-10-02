@@ -1,0 +1,35 @@
+/* テーブルの幅を調整 */
+.table {
+  width: 100%;
+  font-size: 14px;
+}
+
+/* 偶数行の背景色を調整 */
+.table tr:nth-child(even) {
+  background: #faf3dd;
+}
+
+/* ヘッダーの背景色を調整 */
+.table thead tr {
+  background: #ffbb55;
+}
+
+/* テーブルのセルの間隔を調整 */
+.table tbody td:not(:last-child) {
+  padding-left: 12px;
+}
+
+/* 操作列の中央寄せ */
+.table tbody td:last-child {
+  text-align: center;
+}
+
+/* ボタンの間隔を調整 */
+.table tbody td:last-child button:not(:last-child) {
+  margin-right: 8px;
+}
+
+/* マウスオーバー時の背景色を調整 */
+.table tbody tr:hover {
+  background: #ffe8a3;
+}

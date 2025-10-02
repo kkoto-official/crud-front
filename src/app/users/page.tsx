@@ -8,6 +8,7 @@ import { usersApi, UsersListResponse, User } from '@/lib/usersApi';
 import { API_BASE, ApiError } from '@/lib/apiClient';
 import { useCallback } from 'react';
 import Button from '@/components/atoms/Button';
+import UserTable from '@/components/organisms/UserTable';
 
 export default function UsersPage() {
   const router = useRouter();
@@ -61,29 +62,11 @@ export default function UsersPage() {
       {isLoading && <p>読み込み中…</p>}
 
       {!isLoading && !error && (
-        <table border={1} cellPadding={8} style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr><th>ID</th><th>Email</th><th>Name</th><th>Phone</th><th>操作</th></tr>
-          </thead>
-          <tbody>
-            {items.map(u => (
-              <tr key={u.id}>
-                <td style={{ fontFamily: 'monospace' }}>{u.id}</td>
-                <td>{u.email}</td>
-                <td>{u.name}</td>
-                <td>{u.phone ?? ''}</td>
-                <td>
-                  <Button label="編集" onClick={() => onEdit(u.id)} variant="primary" size="small" />
-                  {' '}
-                  <Button label="削除" onClick={() => onDelete(u.id)} variant="danger" size="small" />
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: 20 }}>ユーザーはまだありません</td></tr>
-            )}
-          </tbody>
-        </table>
+        <UserTable
+          users={items}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       )}
 
       <p style={{ marginTop: 12, opacity: 0.7 }}>
