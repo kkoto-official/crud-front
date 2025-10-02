@@ -2,12 +2,15 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { usersApi, UsersListResponse, User } from '@/lib/usersApi';
 import { API_BASE, ApiError } from '@/lib/apiClient';
 import { useCallback } from 'react';
+import Button from '@/components/atoms/Button';
 
 export default function UsersPage() {
+  const router = useRouter();
   const { data, error, isLoading, mutate } = useSWR<UsersListResponse>(
     ['users.list', {}],
     () => usersApi.list(),
@@ -24,6 +27,10 @@ export default function UsersPage() {
     await usersApi.remove(id);
     mutate();
   }, [mutate]);
+
+  const onEdit = useCallback((id: string) => {
+    router.push(`/users/${id}/edit`);
+  }, [router]);
 
   return (
     <main style={{ maxWidth: 900, margin: '2rem auto' }}>
@@ -45,7 +52,7 @@ export default function UsersPage() {
             </div>
           )}
           <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-            <button onClick={() => mutate()}>&#x21bb; 再読み込み</button>
+            <Button label="↻ 再読み込み" onClick={() => mutate()} variant="secondary" size="small" />
             <a href={`${API_BASE}/users`} target="_blank" rel="noreferrer">APIを直接開く</a>
           </div>
         </div>
@@ -66,8 +73,9 @@ export default function UsersPage() {
                 <td>{u.name}</td>
                 <td>{u.phone ?? ''}</td>
                 <td>
-                  <Link href={`/users/${u.id}/edit`}>編集</Link>{' '}
-                  <button onClick={() => onDelete(u.id)}>削除</button>
+                  <Button label="編集" onClick={() => onEdit(u.id)} variant="primary" size="small" />
+                  {' '}
+                  <Button label="削除" onClick={() => onDelete(u.id)} variant="danger" size="small" />
                 </td>
               </tr>
             ))}
