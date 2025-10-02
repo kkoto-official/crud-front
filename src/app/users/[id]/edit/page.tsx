@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import UserForm from '@/components/organisms/UserForm';
-import { useUser, useUserForm, useUserOperations } from '@/hook';
+import { useUser, useUserOperations } from '@/hook';
 
 export default function EditUserPage() {
   const { id } = useParams<{ id: string }>();
@@ -12,12 +12,6 @@ export default function EditUserPage() {
 
   // ユーザー情報の取得
   const { user, error: userError, isLoading: userLoading } = useUser(id as string);
-
-  // フォーム状態管理
-  const { formData, errors, handleChange, validate, getSubmitData } = useUserForm({
-    initialUser: user,
-    mode: 'edit'
-  });
 
   // ユーザー更新操作
   const { updateUser, isLoading, error, clearError } = useUserOperations({
@@ -34,9 +28,7 @@ export default function EditUserPage() {
   });
 
   const handleSubmit = async (userData: { email: string; name: string; phone?: string | null }) => {
-    if (validate()) {
-      await updateUser(id as string, userData);
-    }
+    await updateUser(id as string, userData);
   };
 
   const handleCancel = () => {

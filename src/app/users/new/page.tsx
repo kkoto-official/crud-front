@@ -3,16 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UserForm from '@/components/organisms/UserForm';
-import { useUserForm, useUserOperations } from '@/hook';
+import { useUserOperations } from '@/hook';
 
 export default function NewUserPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const router = useRouter();
-
-  // フォーム状態管理
-  const { formData, errors, handleChange, validate, getSubmitData } = useUserForm({
-    mode: 'create'
-  });
 
   // ユーザー作成操作
   const { createUser, isLoading, error, clearError } = useUserOperations({
@@ -29,9 +24,7 @@ export default function NewUserPage() {
   });
 
   const handleSubmit = async (userData: { email: string; name: string; phone?: string | null }) => {
-    if (validate()) {
-      await createUser(userData);
-    }
+    await createUser(userData);
   };
 
   const handleCancel = () => {
