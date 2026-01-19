@@ -17,7 +17,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete }) => {
     return '';
   };
 
-  const MAX_IMAGE_RETRIES = 3;
+  const MAX_IMAGE_RETRIES = 10;
   const IMAGE_RETRY_DELAY_MS = 1200;
 
   // 画像読み込みエラーを管理する状態
