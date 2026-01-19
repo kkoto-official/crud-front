@@ -17,7 +17,7 @@ export const useUserOperations = (options: UseUserOperationsOptions = {}) => {
   const [error, setError] = useState<string | null>(null);
 
   // ユーザー作成
-  const createUser = useCallback(async (userData: Pick<User, 'email' | 'name'> & { phone?: string | null }) => {
+  const createUser = useCallback(async (userData: Pick<User, 'email' | 'name'> & { phone?: string | null; imageUrl?: string | null }) => {
     setIsLoading(true);
     setError(null);
     
@@ -41,7 +41,7 @@ export const useUserOperations = (options: UseUserOperationsOptions = {}) => {
   }, [onSuccess, onError, redirectTo, router]);
 
   // ユーザー更新
-  const updateUser = useCallback(async (id: string, userData: Partial<Pick<User, 'email' | 'name' | 'phone'>>) => {
+  const updateUser = useCallback(async (id: string, userData: Partial<Pick<User, 'email' | 'name' | 'phone' | 'imageUrl'>>) => {
     setIsLoading(true);
     setError(null);
     

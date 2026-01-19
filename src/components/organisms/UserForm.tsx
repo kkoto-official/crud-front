@@ -7,7 +7,11 @@ import styles from './UserForm.module.css';
 export interface UserFormProps {
   user?: User;
   title: string;
-  onSubmit: (userData: Pick<User, 'email' | 'name'> & { phone?: string | null }) => Promise<void>;
+  onSubmit: (
+    userData: Pick<User, 'email' | 'name'> & { phone?: string | null },
+    imageFile: File | null,
+    removeImage: boolean
+  ) => Promise<void>;
   onCancel: () => void;
   mode: 'create' | 'edit';
   loading?: boolean;
@@ -27,6 +31,10 @@ const UserForm: React.FC<UserFormProps> = ({
     phone: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  const [initialImageUrl, setInitialImageUrl] = useState<string | null>(null);
 
   // 安全な文字列変換関数
   const safeString = (value: any): string => {
@@ -42,6 +50,7 @@ const UserForm: React.FC<UserFormProps> = ({
         name: safeString(user.name),
         phone: safeString(user.phone || '')
       });
+      setInitialImageUrl(user.imageUrl ?? null);
     } else if (mode === 'create') {
       // 新規作成時は空の状態で開始
       setFormData({
@@ -49,8 +58,20 @@ const UserForm: React.FC<UserFormProps> = ({
         name: '',
         phone: ''
       });
+      setInitialImageUrl(null);
     }
+    setImageFile(null);
+    setRemoveImage(false);
   }, [user, mode]);
+
+  useEffect(() => {
+    if (imageFile) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setImagePreviewUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+    setImagePreviewUrl(removeImage ? null : initialImageUrl);
+  }, [imageFile, removeImage, initialImageUrl]);
 
   const validate = () => {
     const newErr: Record<string, string> = {};
@@ -74,6 +95,25 @@ const UserForm: React.FC<UserFormProps> = ({
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setImageFile(file);
+    if (file) {
+      setRemoveImage(false);
+    }
+  };
+
+  const handleClearImageFile = () => {
+    setImageFile(null);
+  };
+
+  const handleToggleRemoveImage = (checked: boolean) => {
+    setRemoveImage(checked);
+    if (checked) {
+      setImageFile(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
@@ -84,7 +124,7 @@ const UserForm: React.FC<UserFormProps> = ({
       };
 
       try {
-        await onSubmit(userData);
+        await onSubmit(userData, imageFile, removeImage);
       } catch (error) {
         // エラーは親コンポーネントで処理
         console.error('Form submission error:', error);
@@ -121,6 +161,44 @@ const UserForm: React.FC<UserFormProps> = ({
           onChange={v => handleChange('phone', v)}
           error={errors.phone}
         />
+      </div>
+
+      <div className={styles.imageField}>
+        <label className={styles.imageLabel}>画像</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className={styles.imageInput}
+        />
+        <div className={styles.imagePreviewWrapper}>
+          {imagePreviewUrl ? (
+            <img src={imagePreviewUrl} alt="プレビュー" className={styles.imagePreview} />
+          ) : (
+            <div className={styles.imagePreviewEmpty}>画像なし</div>
+          )}
+        </div>
+        <div className={styles.imageActions}>
+          {imageFile && (
+            <Button
+              label="選択解除"
+              variant="secondary"
+              size="small"
+              type="button"
+              onClick={handleClearImageFile}
+            />
+          )}
+          {mode === 'edit' && initialImageUrl && !imageFile && (
+            <label className={styles.removeImageLabel}>
+              <input
+                type="checkbox"
+                checked={removeImage}
+                onChange={e => handleToggleRemoveImage(e.target.checked)}
+              />
+              画像を削除する
+            </label>
+          )}
+        </div>
       </div>
 
       <div className={styles.actions}>
