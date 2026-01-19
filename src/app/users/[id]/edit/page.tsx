@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import UserForm from '@/components/organisms/UserForm';
 import { useUser, useUserOperations } from '@/hook';
+import { usersApi } from '@/lib/usersApi';
 
 export default function EditUserPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,8 +28,20 @@ export default function EditUserPage() {
     }
   });
 
-  const handleSubmit = async (userData: { email: string; name: string; phone?: string | null }) => {
-    await updateUser(id as string, userData);
+  const handleSubmit = async (
+    userData: { email: string; name: string; phone?: string | null },
+    imageFile: File | null,
+    removeImage: boolean
+  ) => {
+    let imageUrl: string | null = user.imageUrl ?? null;
+    if (removeImage) {
+      imageUrl = null;
+    }
+    if (imageFile) {
+      const res = await usersApi.uploadImage(imageFile, id as string);
+      imageUrl = res.imageUrl;
+    }
+    await updateUser(id as string, { ...userData, imageUrl });
   };
 
   const handleCancel = () => {

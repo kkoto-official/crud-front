@@ -19,6 +19,25 @@
   padding-left: 12px;
 }
 
+.imageCell {
+  width: 64px;
+  text-align: center;
+  padding: 6px 8px;
+}
+
+.imageThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid var(--retro-border);
+  background: #fffaf0;
+}
+
+.imagePlaceholder {
+  color: #888;
+  font-size: 12px;
+}
+
 /* 操作列の中央寄せ */
 .table tbody td:last-child {
   text-align: center;

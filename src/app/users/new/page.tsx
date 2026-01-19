@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UserForm from '@/components/organisms/UserForm';
 import { useUserOperations } from '@/hook';
+import { usersApi } from '@/lib/usersApi';
 
 export default function NewUserPage() {
   const [msg, setMsg] = useState<string | null>(null);
@@ -23,8 +24,17 @@ export default function NewUserPage() {
     }
   });
 
-  const handleSubmit = async (userData: { email: string; name: string; phone?: string | null }) => {
-    await createUser(userData);
+  const handleSubmit = async (
+    userData: { email: string; name: string; phone?: string | null },
+    imageFile: File | null,
+    _removeImage: boolean
+  ) => {
+    let imageUrl: string | null = null;
+    if (imageFile) {
+      const res = await usersApi.uploadImage(imageFile);
+      imageUrl = res.imageUrl;
+    }
+    await createUser({ ...userData, imageUrl });
   };
 
   const handleCancel = () => {
